@@ -137,18 +137,12 @@ pub fn find_tool(target: &str, tool: &str) -> Option<Tool> {
         let ucrt_lib = ucrt.join("Lib").join(&ucrt_version);
         tool.libs.push(ucrt_lib.join("ucrt").join(sub));
 
+        tool.path.push(ucrt.join("bin").join(sub));
+
         if let Some(dir) = get_sdk10_dir() {
             tool.libs.push(dir.join("um").join(sub));
-            tool.path.push(dir.join("bin").join(sub));
-            tool.include.push(dir.join("include/shared"));
-            tool.include.push(dir.join("include/um"));
-            tool.include.push(dir.join("include/winrt"));
         } else if let Some(dir) = get_sdk81_dir() {
             tool.libs.push(dir.join("um").join(sub));
-            tool.path.push(dir.join("bin").join(sub));
-            tool.include.push(dir.join("include/shared"));
-            tool.include.push(dir.join("include/um"));
-            tool.include.push(dir.join("include/winrt"));
         } else {
             return None
         }
@@ -184,6 +178,7 @@ pub fn find_tool(target: &str, tool: &str) -> Option<Tool> {
     }
 
     fn add_env(tool: &mut Tool, env: &str, paths: Vec<PathBuf>) {
+        println!("add {} {:?}", env, paths);
         let prev = env::var_os(env).unwrap_or(OsString::new());
         let prev = env::split_paths(&prev);
         let new = paths.into_iter().chain(prev);
