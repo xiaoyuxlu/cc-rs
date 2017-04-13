@@ -110,10 +110,18 @@ pub fn find_tool(target: &str, tool: &str) -> Option<Tool> {
     // environment variables like `LIB`, `INCLUDE`, and `PATH` to ensure that
     // the tool is actually usable.
 
-    return find_msvc_latest(tool, target, "15.0")
+    return find_vs2017()
+        .or_else(|| find_msvc_latest(tool, target, "15.0"))
         .or_else(|| find_msvc_latest(tool, target, "14.0"))
         .or_else(|| find_msvc_12(tool, target))
         .or_else(|| find_msvc_11(tool, target));
+
+    fn find_vs2017() -> Option<Tool> {
+        let key = r"SOFTWARE\WOW6432Node\Microsoft\DevDiv\vs\Servicing\15.0";
+        let key = otry!(LOCAL_MACHINE.open(key.as_ref()).ok());
+        println!("{:?}", key.query_str("Core@Install"));
+        None
+    }
 
     // For MSVC 14 or newer we need to find the Universal CRT as well as either
     // the Windows 10 SDK or Windows 8.1 SDK.
