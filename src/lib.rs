@@ -1715,7 +1715,7 @@ impl Build {
 
         let objects: Vec<_> = objs.iter().map(|obj| obj.dst.clone()).collect();
         let target = self.get_target()?;
-        if target.contains("msvc") {
+        if target.contains("msvc") || target.contains("unknown-uefi") {
             let (mut cmd, program) = self.get_ar()?;
             let mut out = OsString::from("-out:");
             out.push(dst);
@@ -1997,6 +1997,8 @@ impl Build {
                     "clang".to_string()
                 } else if target.contains("vxworks") {
                     "wr-c++".to_string()
+                } else if target.contains("unknown-uefi") {
+                    msvc.to_string()
                 } else if self.get_host()? != target {
                     let prefix = self.prefix_for_target(&target);
                     match prefix {
@@ -2047,7 +2049,7 @@ impl Build {
         if let Some(cl_exe) = cl_exe {
             if tool.family == (ToolFamily::Msvc { clang_cl: true })
                 && tool.env.len() == 0
-                && target.contains("msvc")
+                && (target.contains("msvc") || target.contains("unknown-uefi"))
             {
                 for &(ref k, ref v) in cl_exe.env.iter() {
                     tool.env.push((k.to_owned(), v.to_owned()));
@@ -2220,7 +2222,7 @@ impl Build {
             }
 
             "emar".to_string()
-        } else if target.contains("msvc") {
+        } else if target.contains("msvc") || target.contains("unknown-uefi") {
             match windows_registry::find(&target, "lib.exe") {
                 Some(t) => return Ok((t, "lib.exe".to_string())),
                 None => "lib.exe".to_string(),
