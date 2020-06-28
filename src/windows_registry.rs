@@ -51,7 +51,7 @@ pub fn find_tool(target: &str, tool: &str) -> Option<Tool> {
 
     // This logic is all tailored for MSVC, if we're not that then bail out
     // early.
-    if !target.contains("msvc") {
+    if !(target.contains("msvc") || target.contains("uefi")){
         return None;
     }
 
@@ -68,7 +68,7 @@ pub fn find_tool(target: &str, tool: &str) -> Option<Tool> {
 
     // If VCINSTALLDIR is set, then someone's probably already run vcvars and we
     // should just find whatever that indicates.
-    if env::var_os("VCINSTALLDIR").is_some() {
+    if env::var_os("VCINSTALLDIR").is_some() && !target.contains("uefi") {
         return env::var_os("PATH")
             .and_then(|path| {
                 env::split_paths(&path)

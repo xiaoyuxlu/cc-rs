@@ -1145,7 +1145,7 @@ impl Build {
     fn compile_object(&self, obj: &Object) -> Result<(), Error> {
         let is_asm = obj.src.extension().and_then(|s| s.to_str()) == Some("asm");
         let target = self.get_target()?;
-        let msvc = target.contains("msvc");
+        let msvc = target.contains("msvc") || target.contains("uefi");
         let compiler = self.try_get_compiler()?;
         let clang = compiler.family == ToolFamily::Clang;
         let (mut cmd, name) = if msvc && is_asm {
