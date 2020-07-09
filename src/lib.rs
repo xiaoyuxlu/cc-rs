@@ -1384,10 +1384,11 @@ impl Build {
                     cmd.push_cc_arg("-fdata-sections".into());
                 }
                 // Disable generation of PIC on bare-metal for now: rust-lld doesn't support this yet
-                if self
-                    .pic
-                    .unwrap_or(!target.contains("windows") && !target.contains("-none-"))
-                {
+                if self.pic.unwrap_or(
+                    !target.contains("windows")
+                        && !target.contains("-none-")
+                        && !target.contains("uefi"),
+                ) {
                     cmd.push_cc_arg("-fPIC".into());
                     // PLT only applies if code is compiled with PIC support,
                     // and only for ELF targets.
@@ -1417,8 +1418,15 @@ impl Build {
             ToolFamily::Clang => {
                 if !(target.contains("android")
                     && android_clang_compiler_uses_target_arg_internally(&cmd.path))
+                    && !target.contains("uefi")
                 {
                     cmd.args.push(format!("--target={}", target).into());
+                } else if target.contains("uefi") {
+                    if target.contains("x86_64") {
+                        cmd.args.push("--target=x86_64-unknown-windows-gnu".into());
+                    } else {
+                        cmd.args.push("--target=i686-unknown-windows-gnu".into())
+                    }
                 }
             }
             ToolFamily::Msvc { clang_cl } => {
